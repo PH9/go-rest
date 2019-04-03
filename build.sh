@@ -1,1 +1,3 @@
-docker build --no-cache -t wasith/go-rest
+set -x
+
+docker build --no-cache -t wasith/go-rest .
