@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -8,10 +9,12 @@ import (
 	"os"
 )
 
+var port string
+
 func main() {
 	fmt.Print("[I] API is starting...")
 
-	port := os.Getenv("PORT")
+	port = os.Getenv("PORT")
 	if port == "" {
 		port = "9090"
 	}
@@ -33,16 +36,29 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func errorHandler(w http.ResponseWriter, r *http.Request, status int) {
-	body, err := ioutil.ReadAll(r.Body)
-	if err != nil {
-		fmt.Fprint(w, err)
-		return
-	}
-
 	contentType := r.Header.Get("Content-Type")
 	if contentType != "" {
 		w.Header().Set("Content-Type", contentType)
 	}
 
-	fmt.Fprintf(w, "%q", body)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		fmt.Fprint(w, `{"message":"cannot get body"}`)
+		return
+	}
+
+	res := defaultResponse{Port: port, Path: r.URL.Path, Body: string(body)}
+	b, err := json.Marshal(res)
+	if err != nil {
+		fmt.Fprint(w, `{"message":"cannot parse json"}`)
+		return
+	}
+
+	fmt.Fprint(w, string(b))
+}
+
+type defaultResponse struct {
+	Port string
+	Path string
+	Body string
 }
