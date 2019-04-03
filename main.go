@@ -27,6 +27,14 @@ func main() {
 
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL.Path)
+	log.Println(r.Header)
+	body, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		log.Println("Cannot parse body")
+	} else {
+		log.Println(string(body))
+	}
+
 	if r.URL.Path != "/" {
 		errorHandler(w, r, http.StatusNotFound)
 		return
